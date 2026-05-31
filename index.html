@@ -4,151 +4,310 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>FitTrack Pro</title>
-
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#0ea5e9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="FitTrack">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="description" content="Personal daily fitness & nutrition tracker">
-
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         * { -webkit-tap-highlight-color: transparent; }
+
         body {
             background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 50%, #f0fdf4 100%);
             min-height: 100vh;
             color: #334155;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-size: 14px;
+            padding-bottom: 80px;
         }
+
         .card {
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.9);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(226,232,240,0.8);
             border-radius: 18px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
-        }
-        .strikethrough { text-decoration: line-through; color: #94a3b8; }
-
-        .cup-active {
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
-            color: #fff !important;
-            border-color: transparent !important;
-            box-shadow: 0 4px 12px rgba(14,165,233,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
         }
 
+        /* TAB CONTENT */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .tab-bar {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid #e2e8f0;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .tab-bar-btn {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 0 8px;
-            color: #94a3b8;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            cursor: pointer;
-            transition: color 0.2s;
-            border: none;
-            background: none;
-        }
-        .tab-bar-btn .icon { font-size: 22px; line-height: 1; margin-bottom: 3px; }
-        .tab-bar-btn.active { color: #0ea5e9; }
-        .tab-bar-btn.active .tab-indicator {
-            width: 4px; height: 4px;
-            background: #0ea5e9;
-            border-radius: 50%;
-            margin: 3px auto 0;
-        }
-        .tab-indicator { width: 4px; height: 4px; margin: 3px auto 0; }
-
-        .cell-perfect { background: linear-gradient(135deg,#10b981,#059669); color:#fff; font-weight:bold; }
-        .cell-partial  { background: linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font-weight:600; }
-        .cell-rest     { background: linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; border-color:transparent; }
-        .cell-unlogged { background:#f8fafc; color:#94a3b8; border:1.5px dashed #cbd5e1; }
-
-        button:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-
-        /* Install Banner */
-        #installBanner {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            border-radius: 16px;
-            color: white;
-            display: none;
-        }
-
+        /* GRADIENT HEADER */
         .gradient-header {
-            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
             border-radius: 0 0 24px 24px;
             padding: 16px 16px 20px;
             margin-bottom: 16px;
             color: white;
         }
-        .section-label {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #94a3b8;
-            margin-bottom: 8px;
+        .header-row { display: flex; justify-content: space-between; align-items: center; }
+        .header-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
+        .header-title { font-size: 20px; font-weight: 900; color: white; letter-spacing: -0.5px; }
+        .header-sub { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.9); margin-top: 4px; }
+        .header-btns { display: flex; gap: 8px; }
+        .nav-btn {
+            width: 40px; height: 40px; border-radius: 14px;
+            background: rgba(255,255,255,0.2); color: white;
+            font-weight: 900; font-size: 16px; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.1s;
         }
-        .ring-track { stroke: #e2e8f0; }
-        .ring-progress { stroke: url(#ringGrad); }
+        .nav-btn:active { transform: scale(0.92); }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* PAGE PADDING */
+        .page-body { padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
+
+        /* INSTALL BANNER */
+        #installBanner {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            border-radius: 16px; color: white;
+            display: none; align-items: center;
+            justify-content: space-between; gap: 12px; padding: 14px 16px;
+        }
+        .install-text { font-weight: 900; font-size: 13px; }
+        .install-sub { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+        .install-btn {
+            background: white; color: #0284c7; font-weight: 900;
+            font-size: 11px; padding: 8px 14px; border-radius: 12px;
+            border: none; cursor: pointer; white-space: nowrap;
+        }
+
+        /* PROGRESS RING CARD */
+        .ring-card { padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .ring-wrap { position: relative; width: 128px; height: 128px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+        .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .ring-pct { position: absolute; font-size: 28px; font-weight: 900; color: #0f172a; }
+        .day-badge {
+            font-size: 11px; font-weight: 700; color: #64748b;
+            background: #f1f5f9; padding: 6px 16px; border-radius: 99px;
+        }
+
+        /* WEEKLY BAR */
+        .weekly-wrap { width: 100%; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; }
+        .week-labels { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; text-align: center; font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
+        .week-bars { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+        .week-bar { height: 8px; border-radius: 99px; background: #f1f5f9; }
+
+        /* WEIGHT CARD */
+        .weight-card { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .weight-icon { width: 36px; height: 36px; background: #f3e8ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .weight-label { font-size: 13px; font-weight: 900; color: #1e293b; }
+        .weight-sub { font-size: 10px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+        .weight-input-wrap { display: flex; align-items: center; gap: 6px; }
+        .weight-input {
+            width: 76px; background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 14px; padding: 10px; text-align: center;
+            color: #0f172a; font-weight: 900; font-size: 16px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .weight-input:focus { border-color: #38bdf8; background: white; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .kg-label { font-size: 11px; font-weight: 700; color: #94a3b8; }
+
+        /* SECTION LABEL */
+        .section-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; }
+
+        /* SELECT CARD */
+        .select-card { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .select-field select {
+            width: 100%; background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 14px; padding: 12px; color: #1e293b;
+            font-weight: 600; font-size: 13px; outline: none;
+            transition: border-color 0.2s; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center;
+            padding-right: 36px;
+        }
+        .select-field select:focus { border-color: #38bdf8; background-color: white; }
+
+        /* CHECKLIST CARDS */
+        .list-card { padding: 16px; }
+        .list-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .list-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .list-title { font-size: 13px; font-weight: 900; color: #1e293b; }
+        .list-items { display: flex; flex-direction: column; gap: 8px; }
+        .check-item {
+            display: flex; align-items: center; gap: 10px;
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
+            padding: 11px 12px; border-radius: 14px;
+        }
+        .check-item input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+        .check-item input[type="text"] {
+            flex: 1; background: transparent; border: none;
+            font-size: 12px; font-weight: 500; color: #475569;
+            outline: none; min-width: 0;
+        }
+        .remove-btn { color: #cbd5e1; font-size: 18px; font-weight: 900; background: none; border: none; cursor: pointer; line-height: 1; padding: 0 2px; flex-shrink: 0; }
+        .remove-btn:hover { color: #f87171; }
+        .add-row { display: flex; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 12px; margin-top: 4px; }
+        .add-input {
+            flex: 1; background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 14px; padding: 10px 14px; font-size: 12px;
+            color: #1e293b; outline: none; transition: border-color 0.2s;
+        }
+        .add-input:focus { border-color: #38bdf8; background: white; }
+        .add-btn {
+            background: #0ea5e9; color: white; font-weight: 900; font-size: 18px;
+            width: 44px; border-radius: 14px; border: none; cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .add-btn:active { transform: scale(0.92); }
+        .strikethrough { text-decoration: line-through; color: #94a3b8 !important; }
+
+        /* HYDRATION */
+        .hydration-card { padding: 16px; }
+        .hydration-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .water-badge { font-size: 11px; font-weight: 900; color: #0284c7; background: #e0f2fe; padding: 4px 10px; border-radius: 99px; }
+        .water-sub { font-size: 11px; color: #94a3b8; margin-bottom: 12px; padding-left: 16px; }
+        .cups-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+        .cup-btn {
+            border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 4px;
+            text-align: center; font-weight: 700; font-size: 11px;
+            background: #f8fafc; color: #64748b;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            cursor: pointer; transition: all 0.15s; border: none;
+        }
+        .cup-btn:active { transform: scale(0.92); }
+        .cup-btn.active {
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            color: white; box-shadow: 0 4px 12px rgba(14,165,233,0.35);
+        }
+        .cup-emoji { font-size: 16px; }
+
+        /* CARDIO */
+        .cardio-card { padding: 16px; }
+        .cardio-label {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
+            padding: 14px 16px; border-radius: 14px; cursor: pointer;
+        }
+        .cardio-label:active { background: #f1f5f9; }
+        .cardio-text { font-size: 12px; font-weight: 700; color: #475569; }
+        .cardio-label input[type="checkbox"] { width: 20px; height: 20px; accent-color: #f97316; cursor: pointer; }
+
+        /* NOTES */
+        .notes-card { padding: 16px; }
+        .notes-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .notes-textarea {
+            width: 100%; background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 14px; padding: 12px; font-size: 12px; color: #1e293b;
+            outline: none; resize: none; transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .notes-textarea:focus { border-color: #38bdf8; background: white; }
+
+        /* ANALYTICS */
+        .insights-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+        .insight-box { padding: 12px; border-radius: 16px; text-align: center; }
+        .insight-val { font-size: 16px; font-weight: 900; }
+        .insight-lbl { font-size: 9px; text-transform: uppercase; font-weight: 700; color: #94a3b8; margin-top: 4px; letter-spacing: 0.05em; }
+        .insight-green { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .insight-green .insight-val { color: #16a34a; }
+        .insight-sky { background: #f0f9ff; border: 1px solid #bae6fd; }
+        .insight-sky .insight-val { color: #0284c7; }
+        .insight-orange { background: #fff7ed; border: 1px solid #fed7aa; }
+        .insight-orange .insight-val { color: #ea580c; }
+
+        /* SPARKLINE */
+        .spark-wrap { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 10px; position: relative; height: 80px; }
+        .spark-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8; }
+
+        /* CALENDAR */
+        .cal-legend { display: flex; gap: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; color: #94a3b8; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+        .cal-header { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; text-align: center; font-size: 9px; font-weight: 900; color: #94a3b8; margin-bottom: 8px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+        .cal-cell {
+            border-radius: 10px; padding: 4px 2px; text-align: center;
+            min-height: 44px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            cursor: pointer; border: none; transition: transform 0.1s;
+            font-size: 10px;
+        }
+        .cal-cell:active { transform: scale(0.9); }
+        .cal-day { font-size: 10px; font-weight: 900; }
+        .cal-pct { font-size: 8px; font-weight: 700; opacity: 0.9; margin-top: 1px; }
+        .cell-perfect { background: linear-gradient(135deg,#10b981,#059669); color: white; }
+        .cell-partial  { background: linear-gradient(135deg,#f59e0b,#d97706); color: white; }
+        .cell-rest     { background: linear-gradient(135deg,#3b82f6,#2563eb); color: white; }
+        .cell-unlogged { background: #f8fafc; color: #94a3b8; border: 1.5px dashed #cbd5e1; }
+        .cal-empty     { background: transparent; cursor: default; }
+
+        /* EXPORT BTN */
+        .export-btn {
+            font-size: 10px; color: #0284c7; background: #e0f2fe;
+            border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 10px;
+            font-weight: 800; cursor: pointer; border: none;
+        }
+        .export-btn:active { background: #bae6fd; }
+
+        /* BOTTOM TAB BAR */
+        .tab-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 100;
+        }
+        .tab-bar-btn {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 10px 0 8px; color: #94a3b8;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+            cursor: pointer; border: none; background: none; transition: color 0.2s;
+        }
+        .tab-bar-btn .tab-icon { font-size: 22px; line-height: 1; margin-bottom: 3px; }
+        .tab-bar-btn.active { color: #0ea5e9; }
+        .tab-dot { width: 4px; height: 4px; border-radius: 50%; margin: 3px auto 0; }
+        .tab-bar-btn.active .tab-dot { background: #0ea5e9; }
+
+        /* ANALYTICS CARD PADDING */
+        .analytics-card { padding: 16px; }
+        .analytics-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .cal-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     </style>
 </head>
-<body class="pb-24">
+<body>
 
     <!-- ===== TRACKER TAB ===== -->
     <div id="trackerTab" class="tab-content active">
-        <!-- Header -->
         <div class="gradient-header">
-            <div class="flex justify-between items-center">
+            <div class="header-row">
                 <div>
-                    <div class="text-white/70 text-xs font-bold tracking-wider uppercase mb-0.5">Daily Tracker</div>
-                    <div id="currentDateDisplay" class="text-xl font-black text-white tracking-tight">Today</div>
-                    <div id="streakDisplay" class="text-xs font-bold text-white/90 mt-1 hidden">🔥 0 Day Streak</div>
+                    <div class="header-label">Daily Tracker</div>
+                    <div id="currentDateDisplay" class="header-title">Today</div>
+                    <div id="streakDisplay" class="header-sub" style="display:none">🔥 0 Day Streak</div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="changeDate(-1)" class="w-10 h-10 rounded-2xl bg-white/20 text-white font-black text-lg flex items-center justify-center active:scale-95 transition-transform">&lt;</button>
-                    <button id="nextDayBtn" onclick="changeDate(1)" class="w-10 h-10 rounded-2xl bg-white/20 text-white font-black text-lg flex items-center justify-center active:scale-95 transition-transform">&gt;</button>
+                <div class="header-btns">
+                    <button class="nav-btn" onclick="changeDate(-1)">‹</button>
+                    <button class="nav-btn" id="nextDayBtn" onclick="changeDate(1)">›</button>
                 </div>
             </div>
         </div>
 
-        <div class="px-4 space-y-4">
-
+        <div class="page-body">
             <!-- Install Banner -->
-            <div id="installBanner" class="p-4 flex items-center justify-between gap-3">
+            <div id="installBanner">
                 <div>
-                    <div class="font-black text-sm">Install App 📲</div>
-                    <div class="text-white/80 text-xs mt-0.5">Add to Home Screen for offline use</div>
+                    <div class="install-text">Install App 📲</div>
+                    <div class="install-sub">Add to Home Screen for offline use</div>
                 </div>
-                <button onclick="triggerInstall()" class="bg-white text-sky-600 font-black text-xs px-4 py-2 rounded-xl shrink-0">Install</button>
+                <button class="install-btn" onclick="triggerInstall()">Install</button>
             </div>
 
-            <!-- Progress Ring + Weekly Bar -->
-            <div class="card p-5 flex flex-col items-center">
-                <div class="relative w-32 h-32 flex items-center justify-center mb-3">
-                    <svg class="w-full h-full -rotate-90" viewBox="0 0 144 144">
+            <!-- Progress Ring -->
+            <div class="card ring-card">
+                <div class="ring-wrap">
+                    <svg class="ring-svg" viewBox="0 0 144 144">
                         <defs>
                             <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stop-color="#38bdf8"/>
@@ -157,52 +316,43 @@
                         </defs>
                         <circle cx="72" cy="72" r="60" stroke="#f1f5f9" stroke-width="10" fill="transparent"/>
                         <circle id="progressCircle" cx="72" cy="72" r="60" stroke="url(#ringGrad)" stroke-width="10" fill="transparent"
-                                stroke-dasharray="377" stroke-dashoffset="377" stroke-linecap="round" class="transition-all duration-500"/>
+                                stroke-dasharray="377" stroke-dashoffset="377" stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;"/>
                     </svg>
-                    <div class="absolute text-center">
-                        <div class="text-3xl font-black text-slate-900" id="percentageText">0%</div>
-                    </div>
+                    <div class="ring-pct" id="percentageText">0%</div>
                 </div>
-                <div class="text-xs font-bold text-slate-500 bg-slate-100 px-4 py-1.5 rounded-full" id="dayTypeLabel">Workout Day</div>
-
-                <!-- Weekly Bar -->
-                <div class="w-full mt-4 pt-4 border-t border-slate-100">
-                    <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold text-slate-400 mb-1.5">
+                <div class="day-badge" id="dayTypeLabel">🏋️‍♂️ Workout Active Day</div>
+                <div class="weekly-wrap">
+                    <div class="week-labels">
                         <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
                     </div>
-                    <div id="weeklySummaryBar" class="grid grid-cols-7 gap-1.5">
-                        <div class="h-2 rounded-full bg-slate-100"></div>
-                        <div class="h-2 rounded-full bg-slate-100"></div>
-                        <div class="h-2 rounded-full bg-slate-100"></div>
-                        <div class="h-2 rounded-full bg-slate-100"></div>
-                        <div class="h-2 rounded-full bg-slate-100"></div>
-                        <div class="h-2 rounded-full bg-slate-100"></div>
-                        <div class="h-2 rounded-full bg-slate-100"></div>
+                    <div id="weeklySummaryBar" class="week-bars">
+                        <div class="week-bar"></div><div class="week-bar"></div><div class="week-bar"></div>
+                        <div class="week-bar"></div><div class="week-bar"></div><div class="week-bar"></div>
+                        <div class="week-bar"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Weight -->
-            <div class="card p-4 flex items-center justify-between gap-4">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center text-lg">⚖️</div>
+            <div class="card weight-card">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="weight-icon">⚖️</div>
                     <div>
-                        <div class="text-sm font-black text-slate-800">Body Weight</div>
-                        <div class="text-[10px] text-slate-400 font-medium">Log today's weight</div>
+                        <div class="weight-label">Body Weight</div>
+                        <div class="weight-sub">Log today's weight</div>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <input type="number" step="0.1" id="weightInput" onchange="updateProgress()" placeholder="--"
-                        class="w-20 bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-center text-slate-900 font-black text-base focus:outline-none focus:border-sky-400 focus:bg-white transition-all">
-                    <span class="text-xs text-slate-400 font-bold">KG</span>
+                <div class="weight-input-wrap">
+                    <input type="number" step="0.1" id="weightInput" onchange="updateProgress()" placeholder="--" class="weight-input">
+                    <span class="kg-label">KG</span>
                 </div>
             </div>
 
-            <!-- Routines -->
-            <div class="card p-4 space-y-3">
-                <div>
+            <!-- Routine + Diet -->
+            <div class="card select-card">
+                <div class="select-field">
                     <div class="section-label">Target Routine</div>
-                    <select id="routineSelect" onchange="loadRoutineTemplate()" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-slate-800 font-semibold text-sm focus:outline-none focus:border-sky-400 transition-all">
+                    <select id="routineSelect" onchange="loadRoutineTemplate()">
                         <option value="Chest Day">🏋️‍♂️ Chest Day</option>
                         <option value="Shoulder Day">🏋️‍♂️ Shoulder Day</option>
                         <option value="Quads Day">🏋️‍♂️ Quads Day</option>
@@ -212,120 +362,118 @@
                         <option value="Rest Day">🛌 Rest Day</option>
                     </select>
                 </div>
-                <div>
+                <div class="select-field">
                     <div class="section-label">Diet Profile</div>
-                    <select id="dietSelect" onchange="loadDietTemplate()" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-slate-800 font-semibold text-sm focus:outline-none focus:border-sky-400 transition-all">
-                        <option value="Streamlined">🍛 Streamlined Blueprint</option>
+                    <select id="dietSelect" onchange="loadDietTemplate()">
+                        <option value="Streamlined">🍛 Streamlined Blueprint (Shift-Friendly)</option>
                         <option value="Linear">🥗 Linear 7-Meal Blueprint</option>
                     </select>
                 </div>
             </div>
 
             <!-- Gym Checklist -->
-            <div id="gymCard" class="card p-4">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-2 h-2 rounded-full bg-sky-500"></div>
-                    <h2 class="text-sm font-black text-slate-800">Movement / Gym Checklist</h2>
+            <div class="card list-card" id="gymCard">
+                <div class="list-header">
+                    <div class="list-dot" style="background:#0ea5e9"></div>
+                    <div class="list-title">Movement / Gym Checklist</div>
                 </div>
-                <div id="gymList" class="space-y-2 mb-3"></div>
-                <div class="flex gap-2 border-t border-slate-100 pt-3">
-                    <input type="text" id="customGymInput" placeholder="Add custom exercise..."
-                        class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-400 transition-all">
-                    <button onclick="addCustomExercise()" class="bg-sky-500 text-white px-4 rounded-2xl text-sm font-black active:scale-95 transition-transform">+</button>
+                <div class="list-items" id="gymList"></div>
+                <div class="add-row">
+                    <input type="text" id="customGymInput" placeholder="Add custom exercise..." class="add-input">
+                    <button class="add-btn" onclick="addCustomExercise()">+</button>
                 </div>
             </div>
 
             <!-- Diet Checklist -->
-            <div class="card p-4">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <h2 class="text-sm font-black text-slate-800">Nutrition Checklist</h2>
+            <div class="card list-card">
+                <div class="list-header">
+                    <div class="list-dot" style="background:#f59e0b"></div>
+                    <div class="list-title">Nutrition Checklist</div>
                 </div>
-                <div id="dietList" class="space-y-2"></div>
+                <div class="list-items" id="dietList"></div>
             </div>
 
             <!-- Hydration -->
-            <div class="card p-4">
-                <div class="flex justify-between items-center mb-1">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <h2 class="text-sm font-black text-slate-800">Hydration</h2>
+            <div class="card hydration-card">
+                <div class="hydration-header">
+                    <div class="list-header" style="margin-bottom:0">
+                        <div class="list-dot" style="background:#3b82f6"></div>
+                        <div class="list-title">Hydration</div>
                     </div>
-                    <span id="waterVolDisplay" class="text-xs font-black text-sky-600 bg-sky-50 px-2.5 py-1 rounded-full">0 / 3.0L</span>
+                    <span class="water-badge" id="waterVolDisplay">0 / 3.0L</span>
                 </div>
-                <p class="text-[11px] text-slate-400 mb-3 ml-4">Tap cups (250ml each)</p>
-                <div class="grid grid-cols-4 gap-2" id="cupsGrid"></div>
+                <div class="water-sub">Tap cups (250ml each)</div>
+                <div class="cups-grid" id="cupsGrid"></div>
             </div>
 
             <!-- Cardio -->
-            <div class="card p-4">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-2 h-2 rounded-full bg-orange-500"></div>
-                    <h2 class="text-sm font-black text-slate-800">Daily Cardio Walk</h2>
+            <div class="card cardio-card">
+                <div class="list-header">
+                    <div class="list-dot" style="background:#f97316"></div>
+                    <div class="list-title">Daily Cardio Walk</div>
                 </div>
-                <label class="flex items-center justify-between bg-slate-50 border border-slate-200 p-4 rounded-2xl cursor-pointer active:bg-slate-100 transition-colors">
-                    <span class="text-xs font-bold text-slate-700">30-Minute Continuous Walk</span>
-                    <input type="checkbox" id="walkCheck" onchange="updateProgress()" class="w-5 h-5 accent-orange-500 cursor-pointer">
+                <label class="cardio-label">
+                    <span class="cardio-text">30-Minute Continuous Walk</span>
+                    <input type="checkbox" id="walkCheck" onchange="updateProgress()">
                 </label>
             </div>
 
             <!-- Notes -->
-            <div class="card p-4">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-base">📝</span>
-                    <h2 class="text-sm font-black text-slate-800">Shift / Workout Notes</h2>
+            <div class="card notes-card">
+                <div class="notes-header">
+                    <span style="font-size:16px">📝</span>
+                    <div class="list-title">Shift / Workout Notes</div>
                 </div>
                 <textarea id="dayNotesInput" onchange="updateProgress()" rows="2"
                     placeholder="Record shift fatigue, workout highlights, energy levels..."
-                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-400 transition-all resize-none"></textarea>
+                    class="notes-textarea"></textarea>
             </div>
         </div>
     </div>
 
     <!-- ===== ANALYTICS TAB ===== -->
     <div id="analyticsTab" class="tab-content">
-        <!-- Header -->
         <div class="gradient-header">
-            <div class="flex justify-between items-center">
+            <div class="header-row">
                 <div>
-                    <div class="text-white/70 text-xs font-bold tracking-wider uppercase mb-0.5">Progress</div>
-                    <div id="analyticsMonthDisplay" class="text-xl font-black text-white">Month Year</div>
+                    <div class="header-label">Progress</div>
+                    <div id="analyticsMonthDisplay" class="header-title">Month Year</div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="changeAnalyticsMonth(-1)" class="w-10 h-10 rounded-2xl bg-white/20 text-white font-black text-lg flex items-center justify-center active:scale-95 transition-transform">&lt;</button>
-                    <button id="nextMonthBtn" onclick="changeAnalyticsMonth(1)" class="w-10 h-10 rounded-2xl bg-white/20 text-white font-black text-lg flex items-center justify-center active:scale-95 transition-transform">&gt;</button>
+                <div class="header-btns">
+                    <button class="nav-btn" onclick="changeAnalyticsMonth(-1)">‹</button>
+                    <button class="nav-btn" id="nextMonthBtn" onclick="changeAnalyticsMonth(1)">›</button>
                 </div>
             </div>
         </div>
 
-        <div class="px-4 space-y-4">
-            <!-- Month Stats -->
-            <div class="card p-4">
-                <div class="flex justify-between items-center mb-3">
+        <div class="page-body">
+            <!-- Month Insights -->
+            <div class="card analytics-card">
+                <div class="analytics-header">
                     <div class="section-label">Month Insights</div>
-                    <button onclick="exportMonthToCSV()" class="text-[10px] text-sky-600 bg-sky-50 border border-sky-100 px-3 py-1.5 rounded-xl font-black">📥 Export CSV</button>
+                    <button class="export-btn" onclick="exportMonthToCSV()">📥 Export CSV</button>
                 </div>
-                <div class="grid grid-cols-3 gap-2.5">
-                    <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-2xl text-center">
-                        <div id="consistencyMetric" class="text-lg font-black text-emerald-600">0/0</div>
-                        <div class="text-[9px] text-slate-400 uppercase mt-1 font-bold">Perfect Days</div>
+                <div class="insights-grid">
+                    <div class="insight-box insight-green">
+                        <div class="insight-val" id="consistencyMetric">0/0</div>
+                        <div class="insight-lbl">Perfect Days</div>
                     </div>
-                    <div class="bg-sky-50 border border-sky-100 p-3 rounded-2xl text-center">
-                        <div id="totalWaterMetric" class="text-lg font-black text-sky-600">0.0L</div>
-                        <div class="text-[9px] text-slate-400 uppercase mt-1 font-bold">Water Total</div>
+                    <div class="insight-box insight-sky">
+                        <div class="insight-val" id="totalWaterMetric">0.0L</div>
+                        <div class="insight-lbl">Water Total</div>
                     </div>
-                    <div class="bg-orange-50 border border-orange-100 p-3 rounded-2xl text-center">
-                        <div id="totalWalksMetric" class="text-lg font-black text-orange-600">0</div>
-                        <div class="text-[9px] text-slate-400 uppercase mt-1 font-bold">LISS Walks</div>
+                    <div class="insight-box insight-orange">
+                        <div class="insight-val" id="totalWalksMetric">0</div>
+                        <div class="insight-lbl">LISS Walks</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Weight Sparkline -->
-            <div class="card p-4">
-                <div class="section-label mb-2">Weight Trend</div>
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 relative" style="height:80px">
-                    <svg id="sparklineSvg" class="w-full h-full" viewBox="0 0 300 60" preserveAspectRatio="none">
+            <!-- Sparkline -->
+            <div class="card analytics-card">
+                <div class="section-label">Weight Trend</div>
+                <div class="spark-wrap">
+                    <svg id="sparklineSvg" style="width:100%;height:100%" viewBox="0 0 300 60" preserveAspectRatio="none">
                         <defs>
                             <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                                 <stop offset="0%" stop-color="#38bdf8"/>
@@ -334,208 +482,155 @@
                         </defs>
                         <path id="sparklinePath" d="" fill="none" stroke="url(#sparkGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <div id="sparklinePlaceholder" class="absolute inset-0 flex items-center justify-center text-xs text-slate-400 font-medium">Log weight to see trend</div>
+                    <div id="sparklinePlaceholder" class="spark-placeholder">Log weight to see trend</div>
                 </div>
             </div>
 
             <!-- Calendar -->
-            <div class="card p-4">
-                <div class="flex justify-between items-center mb-3">
+            <div class="card analytics-card">
+                <div class="cal-card-header">
                     <div class="section-label">Day-by-Day Grid</div>
-                    <div class="flex gap-2 text-[9px] font-bold text-slate-400">
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-emerald-500 rounded-sm"></span>80%+</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-amber-500 rounded-sm"></span>Active</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-blue-500 rounded-sm"></span>Rest</span>
+                    <div class="cal-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>80%+</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Active</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Rest</div>
                     </div>
                 </div>
-                <div class="grid grid-cols-7 gap-1 text-center text-[9px] font-black text-slate-400 mb-2">
+                <div class="cal-header">
                     <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
                 </div>
-                <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
+                <div class="cal-grid" id="calendarGrid"></div>
             </div>
         </div>
     </div>
 
-    <!-- ===== BOTTOM TAB BAR ===== -->
-    <div class="tab-bar flex">
+    <!-- BOTTOM TAB BAR -->
+    <div class="tab-bar">
         <button id="trackerTabBtn" class="tab-bar-btn active" onclick="switchTab('tracker')">
-            <span class="icon">🏋️</span>
+            <span class="tab-icon">🏋️</span>
             <span>Tracker</span>
-            <div class="tab-indicator"></div>
+            <div class="tab-dot"></div>
         </button>
         <button id="analyticsTabBtn" class="tab-bar-btn" onclick="switchTab('analytics')">
-            <span class="icon">📊</span>
+            <span class="tab-icon">📊</span>
             <span>Progress</span>
-            <div class="tab-indicator"></div>
+            <div class="tab-dot"></div>
         </button>
     </div>
 
     <script>
-    // ============================================================
-    // PWA SETUP
-    // ============================================================
+    // PWA
     let deferredInstallPrompt = null;
-
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         deferredInstallPrompt = e;
         document.getElementById('installBanner').style.display = 'flex';
     });
-
     function triggerInstall() {
-        if (deferredInstallPrompt) {
-            deferredInstallPrompt.prompt();
-            deferredInstallPrompt.userChoice.then(() => {
-                deferredInstallPrompt = null;
-                document.getElementById('installBanner').style.display = 'none';
-            });
-        }
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then(() => {
+            deferredInstallPrompt = null;
+            document.getElementById('installBanner').style.display = 'none';
+        });
     }
 
-    // Inline Service Worker via Blob
+    // Service Worker
     const swCode = `
-        const CACHE = 'fittrack-v1';
-        self.addEventListener('install', e => {
-            self.skipWaiting();
-        });
-        self.addEventListener('activate', e => {
-            e.waitUntil(clients.claim());
-        });
-        self.addEventListener('fetch', e => {
-            if (e.request.method !== 'GET') return;
-            e.respondWith(
-                caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-                    const clone = res.clone();
-                    caches.open(CACHE).then(c => c.put(e.request, clone));
-                    return res;
-                }))
-            );
+        const CACHE='fittrack-v2';
+        self.addEventListener('install',e=>self.skipWaiting());
+        self.addEventListener('activate',e=>e.waitUntil(clients.claim()));
+        self.addEventListener('fetch',e=>{
+            if(e.request.method!=='GET')return;
+            e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(r=>{
+                const cl=r.clone();
+                caches.open(CACHE).then(ca=>ca.put(e.request,cl));
+                return r;
+            })));
         });
     `;
     if ('serviceWorker' in navigator) {
         const blob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).catch(() => {});
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
     }
 
-    // Inject PWA Manifest dynamically
-    const manifest = {
-        name: "FitTrack Pro",
-        short_name: "FitTrack",
-        description: "Personal daily fitness & nutrition tracker",
-        start_url: "./",
-        display: "standalone",
-        orientation: "portrait",
-        theme_color: "#0ea5e9",
-        background_color: "#f0f9ff",
-        icons: [
-            { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230ea5e9'/><text y='.9em' font-size='72' x='50%' text-anchor='middle'>🏋️</text></svg>", sizes: "192x192", type: "image/svg+xml" }
-        ]
-    };
-    const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-    const manifestUrl = URL.createObjectURL(manifestBlob);
-    const manifestLink = document.createElement('link');
-    manifestLink.rel = 'manifest';
-    manifestLink.href = manifestUrl;
-    document.head.appendChild(manifestLink);
-
-    // ============================================================
     // DATA
-    // ============================================================
     const routinesData = {
-        "Chest Day": ["Flat Bench Press (3×12)","Decline Dumbbell Press (3×12)","Incline sitting chest machine (3×12)","Flat Dumbell flyes (3×12)","Cable Chest Fly (3×12)","Pec deck (3×12)","Push-ups (3 variations)","Incline Treadmill (15-20 mins)"],
-        "Shoulder Day": ["Barbell Shoulder Press (3×12)","Seated Dumbell press (3×12)","Dumbell Front Raises (3×12)","Dumbbell Lateral Raises (3×12)","Rope pull for Rear Delts (3×12)","Barbell shrugs (3×12)","Forearms: Wrist Curls (3×15)","Incline Treadmill (15-20 mins)"],
-        "Quads Day": ["Hack squats (3×12)","Walking lunges (3 sets - 10 kg DB)","Leg Press (3×12)","Leg Extensions (4×20)","Seated Calf Raises (4×25)","Cycling (5 mins)"],
-        "Arms Day": ["Triceps: Skull Crushers (4×15)","Triceps: Rope push down (4×15)","Biceps: Dumbbell Curls (3×15)","Biceps: Preacher Curls (4×12)","Biceps: Rope Hammer Curls (4×15)","Forearms: Wrist Curls (3×15)","Incline Treadmill (15-20 mins)"],
-        "Back Day": ["Pull-ups (3×8)","Dead lift","Lat pulldown (4×12)","Back lat pulldown (3×15)","Wide grip machine rowing (3×12)","Dumbbell Rowing (3×12)","Cross trainer (7 min)"],
-        "Hamstrings Day": ["Sumo dumbell squats (4×15)","Leg Curls Machine (4×20)","Hamstring dumbell extensions (3×12)","Leg Press (Top Placement) (3×12)","Standing Calf Raises (3×15)","Cycling (7 min)"],
-        "Rest Day": []
+        "Chest Day":["Flat Bench Press (3×12)","Decline Dumbbell Press (3×12)","Incline sitting chest machine (3×12)","Flat Dumbell flyes (3×12)","Cable Chest Fly (3×12)","Pec deck (3×12)","Push-ups (3 variations)","Incline Treadmill (15-20 mins)"],
+        "Shoulder Day":["Barbell Shoulder Press (3×12)","Seated Dumbell press (3×12)","Dumbell Front Raises (3×12)","Dumbbell Lateral Raises (3×12)","Rope pull for Rear Delts (3×12)","Barbell shrugs (3×12)","Forearms: Wrist Curls (3×15)","Incline Treadmill (15-20 mins)"],
+        "Quads Day":["Hack squats (3×12)","Walking lunges (3 sets - 10 kg DB)","Leg Press (3×12)","Leg Extensions (4×20)","Seated Calf Raises (4×25)","Cycling (5 mins)"],
+        "Arms Day":["Triceps: Skull Crushers (4×15)","Triceps: Rope push down (4×15)","Biceps: Dumbbell Curls (3×15)","Biceps: Preacher Curls (4×12)","Biceps: Rope Hammer Curls (4×15)","Forearms: Wrist Curls (3×15)","Incline Treadmill (15-20 mins)"],
+        "Back Day":["Pull-ups (3×8)","Dead lift","Lat pulldown (4×12)","Back lat pulldown (3×15)","Wide grip machine rowing (3×12)","Dumbbell Rowing (3×12)","Cross trainer (7 min)"],
+        "Hamstrings Day":["Sumo dumbell squats (4×15)","Leg Curls Machine (4×20)","Hamstring dumbell extensions (3×12)","Leg Press (Top Placement) (3×12)","Standing Calf Raises (3×15)","Cycling (7 min)"],
+        "Rest Day":[]
     };
     const dietsData = {
-        "Streamlined": ["Meal 1: Oats + Seeds + 3 Egg Whites + Fruits + 15 Almonds","Meal 2 (Lunch): 100g Brown Rice + 150g Protein Curry + 100g Salad","Snack: 1 Cup Fresh Fruit Bowl + Green Tea with Lemon","Meal 3 (Dinner): 2 Phulkas + 100g Protein Curry + 100g Salad"],
-        "Linear": ["06:00 AM: 1 Apple","08:30 AM: Oats, Seeds, 3 Egg Whites, 15 Almonds","11:30 AM: 1 Small Cup Fruit","12:30 PM: Lunch (100g Rice, 150g Curry, 100g Salad)","03:00 PM: Green tea with lemon","05:00 PM: 1 Small Cup Fruit","06:00 PM: 3 Egg whites only","07:30 PM: Dinner (2 Pulka, 100g Salad, 100g Curry)"]
+        "Streamlined":["Meal 1: Oats + Seeds + 3 Egg Whites + Fruits + 15 Almonds","Meal 2 (Lunch): 100g Brown Rice + 150g Protein Curry + 100g Salad","Snack: 1 Cup Fresh Fruit Bowl + Green Tea with Lemon","Meal 3 (Dinner): 2 Phulkas + 100g Protein Curry + 100g Salad"],
+        "Linear":["06:00 AM: 1 Apple","08:30 AM: Oats, Seeds, 3 Egg Whites, 15 Almonds","11:30 AM: 1 Small Cup Fruit","12:30 PM: Lunch (100g Rice, 150g Curry, 100g Salad)","03:00 PM: Green tea with lemon","05:00 PM: 1 Small Cup Fruit","06:00 PM: 3 Egg whites only","07:30 PM: Dinner (2 Pulka, 100g Salad, 100g Curry)"]
     };
 
-    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     let currentDate = new Date(); currentDate.setHours(0,0,0,0);
     let analyticsViewDate = null;
     let currentWaterCount = 0;
 
-    // ============================================================
-    // UTILS
-    // ============================================================
-    function fmt(date) {
-        return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-    }
-    function clone(d) { return new Date(d.getTime()); }
-    function isToday(d) { const t=new Date(); return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate(); }
-    function isFuture(d) { const t=new Date(); t.setHours(0,0,0,0); return d > t; }
+    const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const clone = d => new Date(d.getTime());
+    const isToday = d => { const t=new Date(); return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate(); };
+    const isFuture = d => { const t=new Date(); t.setHours(0,0,0,0); return d>t; };
 
-    // ============================================================
-    // TABS
-    // ============================================================
     function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-bar-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(id + 'Tab').classList.add('active');
-        document.getElementById(id + 'TabBtn').classList.add('active');
-        if (id === 'analytics') {
-            if (!analyticsViewDate) analyticsViewDate = clone(currentDate);
-            renderMonthlyAnalytics();
-        }
+        document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+        document.querySelectorAll('.tab-bar-btn').forEach(el=>el.classList.remove('active'));
+        document.getElementById(id+'Tab').classList.add('active');
+        document.getElementById(id+'TabBtn').classList.add('active');
+        if (id==='analytics') { if(!analyticsViewDate) analyticsViewDate=clone(currentDate); renderMonthlyAnalytics(); }
     }
 
-    // ============================================================
-    // CUPS
-    // ============================================================
     function generateCupsGrid() {
         const c = document.getElementById('cupsGrid');
         c.innerHTML = '';
-        for (let i = 1; i <= 12; i++) {
-            c.innerHTML += `<button onclick="handleCupClick(${i})" id="cup-${i}"
-                class="border border-slate-200 rounded-2xl py-3 text-center font-bold text-xs bg-slate-50 text-slate-500 transition-all flex flex-col items-center justify-center gap-0.5 active:scale-95">
-                <span class="text-base">🥛</span><span>${i}</span></button>`;
+        for (let i=1;i<=12;i++) {
+            const b = document.createElement('button');
+            b.className = 'cup-btn';
+            b.id = `cup-${i}`;
+            b.onclick = () => handleCupClick(i);
+            b.innerHTML = `<span class="cup-emoji">🥛</span><span>${i}</span>`;
+            c.appendChild(b);
         }
     }
 
     function handleCupClick(idx) {
-        currentWaterCount = currentWaterCount === idx ? idx - 1 : idx;
+        currentWaterCount = currentWaterCount===idx ? idx-1 : idx;
         updateWaterUI(); updateProgress();
     }
 
     function updateWaterUI() {
-        for (let i = 1; i <= 12; i++) {
+        for (let i=1;i<=12;i++) {
             const b = document.getElementById(`cup-${i}`);
-            b.className = i <= currentWaterCount
-                ? "border border-transparent rounded-2xl py-3 text-center font-bold text-xs cup-active transition-all flex flex-col items-center justify-center gap-0.5 active:scale-95"
-                : "border border-slate-200 rounded-2xl py-3 text-center font-bold text-xs bg-slate-50 text-slate-500 transition-all flex flex-col items-center justify-center gap-0.5 active:scale-95";
+            b.classList.toggle('active', i<=currentWaterCount);
         }
         document.getElementById('waterVolDisplay').innerText = `${(currentWaterCount*0.25).toFixed(2)} / 3.0L`;
     }
 
-    // ============================================================
-    // LOAD / SAVE
-    // ============================================================
     function loadDayData() {
         const key = fmt(currentDate);
         document.getElementById('currentDateDisplay').innerText =
-            currentDate.toLocaleDateString('en-IN', { weekday:'short', month:'short', day:'numeric' });
-
-        const nextBtn = document.getElementById('nextDayBtn');
+            currentDate.toLocaleDateString('en-IN',{weekday:'short',month:'short',day:'numeric'});
         const nx = clone(currentDate); nx.setDate(nx.getDate()+1);
-        nextBtn.disabled = isFuture(nx);
+        document.getElementById('nextDayBtn').disabled = isFuture(nx);
 
         const saved = localStorage.getItem(key);
         if (saved) {
             const d = JSON.parse(saved);
-            document.getElementById('routineSelect').value = d.routine || 'Chest Day';
-            document.getElementById('dietSelect').value = d.diet || 'Streamlined';
-            document.getElementById('walkCheck').checked = d.walk || false;
-            document.getElementById('weightInput').value = d.weight || '';
-            document.getElementById('dayNotesInput').value = d.notes || '';
-            currentWaterCount = d.waterCount || 0;
-            renderGymList(d.gymItems || []);
-            renderDietList(d.dietItems || []);
+            document.getElementById('routineSelect').value = d.routine||'Chest Day';
+            document.getElementById('dietSelect').value = d.diet||'Streamlined';
+            document.getElementById('walkCheck').checked = d.walk||false;
+            document.getElementById('weightInput').value = d.weight||'';
+            document.getElementById('dayNotesInput').value = d.notes||'';
+            currentWaterCount = d.waterCount||0;
+            renderGymList(d.gymItems||[]);
+            renderDietList(d.dietItems||[]);
         } else {
             document.getElementById('routineSelect').value = 'Chest Day';
             document.getElementById('dietSelect').value = 'Streamlined';
@@ -551,40 +646,35 @@
 
     function saveDayData() {
         const key = fmt(currentDate);
-        const gymItems = [], dietItems = [];
-        document.querySelectorAll('.gym-item-container').forEach(el => {
-            gymItems.push({ text: el.querySelector('input[type="text"]').value, checked: el.querySelector('input[type="checkbox"]').checked });
+        const gymItems=[], dietItems=[];
+        document.querySelectorAll('.gym-item-container').forEach(el=>{
+            gymItems.push({text:el.querySelector('input[type="text"]').value, checked:el.querySelector('input[type="checkbox"]').checked});
         });
-        document.querySelectorAll('.diet-item-container').forEach(el => {
-            dietItems.push({ text: el.querySelector('input[type="text"]').value, checked: el.querySelector('input[type="checkbox"]').checked });
+        document.querySelectorAll('.diet-item-container').forEach(el=>{
+            dietItems.push({text:el.querySelector('input[type="text"]').value, checked:el.querySelector('input[type="checkbox"]').checked});
         });
         const wv = parseFloat(document.getElementById('weightInput').value);
         localStorage.setItem(key, JSON.stringify({
             routine: document.getElementById('routineSelect').value,
             diet: document.getElementById('dietSelect').value,
             walk: document.getElementById('walkCheck').checked,
-            weight: !isNaN(wv) && wv > 0 ? wv : null,
-            notes: document.getElementById('dayNotesInput').value || '',
-            gymItems, dietItems,
-            waterCount: currentWaterCount,
+            weight: !isNaN(wv)&&wv>0 ? wv : null,
+            notes: document.getElementById('dayNotesInput').value||'',
+            gymItems, dietItems, waterCount: currentWaterCount,
             computedScore: calcScore(document.getElementById('routineSelect').value, gymItems, dietItems, currentWaterCount, document.getElementById('walkCheck').checked)
         }));
     }
 
-    function calcScore(routine, gymItems, dietItems, wc, walk) {
-        const rest = routine === 'Rest Day';
-        let gym = 100;
-        if (!rest) { const c = gymItems.filter(x=>x.checked).length; gym = gymItems.length ? (c/gymItems.length)*100 : 0; }
-        const dc = dietItems.filter(x=>x.checked).length;
-        const diet = dietItems.length ? (dc/dietItems.length)*100 : 0;
-        const water = (wc/12)*100;
-        const wk = walk ? 100 : 0;
-        return rest ? Math.round((diet+water+wk)/3) : Math.round((gym+diet+water+wk)/4);
+    function calcScore(routine, gym, diet, wc, walk) {
+        const rest = routine==='Rest Day';
+        let gs = 100;
+        if (!rest) { const c=gym.filter(x=>x.checked).length; gs=gym.length?(c/gym.length)*100:0; }
+        const dc=diet.filter(x=>x.checked).length;
+        const ds=diet.length?(dc/diet.length)*100:0;
+        const ws=(wc/12)*100, wks=walk?100:0;
+        return rest?Math.round((ds+ws+wks)/3):Math.round((gs+ds+ws+wks)/4);
     }
 
-    // ============================================================
-    // TEMPLATES + LISTS
-    // ============================================================
     function loadRoutineTemplate() {
         renderGymList(routinesData[document.getElementById('routineSelect').value].map(x=>({text:x,checked:false})));
         updateProgress();
@@ -595,214 +685,177 @@
     }
 
     function renderGymList(items) {
-        const card = document.getElementById('gymCard');
-        const container = document.getElementById('gymList');
-        if (document.getElementById('routineSelect').value === 'Rest Day') { card.style.display='none'; return; }
-        card.style.display = 'block';
-        container.innerHTML = '';
-        items.forEach((item, idx) => {
-            container.innerHTML += `<div class="gym-item-container flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                <input type="checkbox" ${item.checked?'checked':''} onchange="updateProgress()" class="w-4 h-4 accent-sky-500 shrink-0">
-                <input type="text" value="${item.text.replace(/"/g,'&quot;')}" onchange="saveDayData()" class="flex-1 bg-transparent text-xs font-medium text-slate-700 focus:outline-none min-w-0 ${item.checked?'strikethrough':''}">
-                <button onclick="removeGymItem(${idx})" class="text-slate-300 hover:text-red-400 font-black text-lg leading-none shrink-0">×</button>
-            </div>`;
+        const card=document.getElementById('gymCard');
+        const c=document.getElementById('gymList');
+        if (document.getElementById('routineSelect').value==='Rest Day'){card.style.display='none';return;}
+        card.style.display='block'; c.innerHTML='';
+        items.forEach((item,idx)=>{
+            const div=document.createElement('div');
+            div.className='check-item gym-item-container';
+            div.innerHTML=`<input type="checkbox" ${item.checked?'checked':''} onchange="updateProgress()" style="accent-color:#0ea5e9">
+                <input type="text" value="${item.text.replace(/"/g,'&quot;')}" onchange="saveDayData()" class="${item.checked?'strikethrough':''}">
+                <button class="remove-btn" onclick="removeGymItem(${idx})">×</button>`;
+            c.appendChild(div);
         });
     }
 
     function addCustomExercise() {
-        const inp = document.getElementById('customGymInput');
-        const text = inp.value.trim();
-        if (!text) return;
-        const items = [];
-        document.querySelectorAll('.gym-item-container').forEach(el => {
-            items.push({ text: el.querySelector('input[type="text"]').value, checked: el.querySelector('input[type="checkbox"]').checked });
+        const inp=document.getElementById('customGymInput');
+        const text=inp.value.trim(); if(!text)return;
+        const items=[];
+        document.querySelectorAll('.gym-item-container').forEach(el=>{
+            items.push({text:el.querySelector('input[type="text"]').value,checked:el.querySelector('input[type="checkbox"]').checked});
         });
-        items.push({ text, checked: false });
-        renderGymList(items);
-        inp.value = '';
-        updateProgress();
+        items.push({text,checked:false}); renderGymList(items); inp.value=''; updateProgress();
     }
 
     function removeGymItem(idx) {
-        const items = [];
-        document.querySelectorAll('.gym-item-container').forEach((el, i) => {
-            if (i !== idx) items.push({ text: el.querySelector('input[type="text"]').value, checked: el.querySelector('input[type="checkbox"]').checked });
+        const items=[];
+        document.querySelectorAll('.gym-item-container').forEach((el,i)=>{
+            if(i!==idx) items.push({text:el.querySelector('input[type="text"]').value,checked:el.querySelector('input[type="checkbox"]').checked});
         });
-        renderGymList(items);
-        updateProgress();
+        renderGymList(items); updateProgress();
     }
 
     function renderDietList(items) {
-        const c = document.getElementById('dietList');
-        c.innerHTML = '';
-        items.forEach(item => {
-            c.innerHTML += `<div class="diet-item-container flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                <input type="checkbox" ${item.checked?'checked':''} onchange="updateProgress()" class="w-4 h-4 accent-amber-500 shrink-0">
-                <input type="text" value="${item.text.replace(/"/g,'&quot;')}" onchange="saveDayData()" class="flex-1 bg-transparent text-xs font-medium text-slate-700 focus:outline-none min-w-0 ${item.checked?'strikethrough':''}">
-            </div>`;
+        const c=document.getElementById('dietList'); c.innerHTML='';
+        items.forEach(item=>{
+            const div=document.createElement('div');
+            div.className='check-item diet-item-container';
+            div.innerHTML=`<input type="checkbox" ${item.checked?'checked':''} onchange="updateProgress()" style="accent-color:#f59e0b">
+                <input type="text" value="${item.text.replace(/"/g,'&quot;')}" onchange="saveDayData()" class="${item.checked?'strikethrough':''}">`;
+            c.appendChild(div);
         });
     }
 
-    // ============================================================
-    // PROGRESS RING
-    // ============================================================
     function updateProgress() {
-        const routine = document.getElementById('routineSelect').value;
-        const rest = routine === 'Rest Day';
-        document.getElementById('dayTypeLabel').innerText = rest ? '🛌 Rest & Recovery Day' : '🏋️‍♂️ Workout Active Day';
-
-        document.querySelectorAll('.gym-item-container, .diet-item-container').forEach(div => {
-            const cb = div.querySelector('input[type="checkbox"]');
-            const txt = div.querySelector('input[type="text"]');
-            cb.checked ? txt.classList.add('strikethrough') : txt.classList.remove('strikethrough');
+        const routine=document.getElementById('routineSelect').value;
+        const rest=routine==='Rest Day';
+        document.getElementById('dayTypeLabel').innerText=rest?'🛌 Rest & Recovery Day':'🏋️‍♂️ Workout Active Day';
+        document.querySelectorAll('.gym-item-container,.diet-item-container').forEach(div=>{
+            const cb=div.querySelector('input[type="checkbox"]');
+            const txt=div.querySelector('input[type="text"]');
+            cb.checked?txt.classList.add('strikethrough'):txt.classList.remove('strikethrough');
         });
-
-        let gym = 100;
-        if (!rest) {
-            const boxes = document.querySelectorAll('#gymList input[type="checkbox"]');
-            gym = boxes.length ? (Array.from(boxes).filter(c=>c.checked).length / boxes.length) * 100 : 0;
-        }
-        const db = document.querySelectorAll('.diet-item-container input[type="checkbox"]');
-        const diet = db.length ? (Array.from(db).filter(c=>c.checked).length / db.length) * 100 : 0;
-        const water = (currentWaterCount/12)*100;
-        const walk = document.getElementById('walkCheck').checked ? 100 : 0;
-        const pct = rest ? Math.round((diet+water+walk)/3) : Math.round((gym+diet+water+walk)/4);
-
-        document.getElementById('percentageText').innerText = `${pct}%`;
-        const circ = 377;
-        document.getElementById('progressCircle').style.strokeDashoffset = circ - (pct/100)*circ;
-        saveDayData();
-        updateWeeklySummaryBar();
+        let gym=100;
+        if(!rest){const b=document.querySelectorAll('#gymList input[type="checkbox"]');gym=b.length?(Array.from(b).filter(c=>c.checked).length/b.length)*100:0;}
+        const db=document.querySelectorAll('.diet-item-container input[type="checkbox"]');
+        const diet=db.length?(Array.from(db).filter(c=>c.checked).length/db.length)*100:0;
+        const water=(currentWaterCount/12)*100;
+        const walk=document.getElementById('walkCheck').checked?100:0;
+        const pct=rest?Math.round((diet+water+walk)/3):Math.round((gym+diet+water+walk)/4);
+        document.getElementById('percentageText').innerText=`${pct}%`;
+        document.getElementById('progressCircle').style.strokeDashoffset=377-(pct/100)*377;
+        saveDayData(); updateWeeklySummaryBar();
     }
 
     function changeDate(days) {
-        const d = clone(currentDate);
-        d.setDate(d.getDate() + days);
-        if (!isFuture(d)) { currentDate = d; loadDayData(); }
+        const d=clone(currentDate); d.setDate(d.getDate()+days);
+        if(!isFuture(d)){currentDate=d;loadDayData();}
     }
 
-    // ============================================================
-    // STREAK
-    // ============================================================
     function calculateStreak() {
-        let streak = 0, d = new Date(); d.setHours(0,0,0,0);
-        while (true) {
-            const rec = localStorage.getItem(fmt(d));
-            if (rec) {
-                const p = JSON.parse(rec);
-                if ((p.computedScore||0) >= 80) { streak++; }
-                else { if (!isToday(d)) break; }
-            } else {
-                if (!isToday(d)) break;
-            }
+        let streak=0, d=new Date(); d.setHours(0,0,0,0);
+        while(true){
+            const rec=localStorage.getItem(fmt(d));
+            if(rec){const p=JSON.parse(rec);if((p.computedScore||0)>=80)streak++;else{if(!isToday(d))break;}}
+            else{if(!isToday(d))break;}
             d.setDate(d.getDate()-1);
         }
-        const badge = document.getElementById('streakDisplay');
-        if (streak > 0) { badge.innerText = `🔥 ${streak} Day Streak`; badge.classList.remove('hidden'); }
-        else badge.classList.add('hidden');
+        const badge=document.getElementById('streakDisplay');
+        if(streak>0){badge.innerText=`🔥 ${streak} Day Streak`;badge.style.display='block';}
+        else badge.style.display='none';
     }
 
-    // ============================================================
-    // WEEKLY BAR
-    // ============================================================
     function updateWeeklySummaryBar() {
-        const ref = clone(currentDate);
-        const day = ref.getDay();
-        const toMon = day === 0 ? 6 : day - 1;
-        const mon = clone(ref); mon.setDate(ref.getDate() - toMon);
-        const bars = document.getElementById('weeklySummaryBar').children;
-        for (let i = 0; i < 7; i++) {
-            const d = clone(mon); d.setDate(mon.getDate()+i);
-            const rec = localStorage.getItem(fmt(d));
-            bars[i].className = 'h-2 rounded-full transition-colors';
-            if (rec) {
-                const p = JSON.parse(rec);
-                const s = p.computedScore||0;
-                if (s>=80) bars[i].classList.add('bg-emerald-500');
-                else if (p.routine==='Rest Day') bars[i].classList.add('bg-blue-400');
-                else if (s>0) bars[i].classList.add('bg-amber-400');
-                else bars[i].classList.add('bg-slate-200');
-            } else bars[i].classList.add('bg-slate-100');
+        const ref=clone(currentDate);
+        const day=ref.getDay(), toMon=day===0?6:day-1;
+        const mon=clone(ref); mon.setDate(ref.getDate()-toMon);
+        const bars=document.getElementById('weeklySummaryBar').children;
+        for(let i=0;i<7;i++){
+            const d=clone(mon); d.setDate(mon.getDate()+i);
+            const rec=localStorage.getItem(fmt(d));
+            bars[i].style.background='';
+            bars[i].className='week-bar';
+            if(rec){const p=JSON.parse(rec);const s=p.computedScore||0;
+                if(s>=80)bars[i].style.background='#10b981';
+                else if(p.routine==='Rest Day')bars[i].style.background='#3b82f6';
+                else if(s>0)bars[i].style.background='#f59e0b';
+                else bars[i].style.background='#e2e8f0';
+            }else bars[i].style.background='#f1f5f9';
         }
     }
 
-    // ============================================================
-    // ANALYTICS
-    // ============================================================
     function changeAnalyticsMonth(dir) {
-        const t = clone(analyticsViewDate); t.setMonth(t.getMonth()+dir);
-        const boundary = new Date(); boundary.setDate(1); boundary.setHours(0,0,0,0);
-        if (new Date(t.getFullYear(), t.getMonth(), 1) <= boundary) { analyticsViewDate = t; renderMonthlyAnalytics(); }
+        const t=clone(analyticsViewDate); t.setMonth(t.getMonth()+dir);
+        const boundary=new Date(); boundary.setDate(1); boundary.setHours(0,0,0,0);
+        if(new Date(t.getFullYear(),t.getMonth(),1)<=boundary){analyticsViewDate=t;renderMonthlyAnalytics();}
     }
 
     function renderMonthlyAnalytics() {
-        const yr = analyticsViewDate.getFullYear(), mo = analyticsViewDate.getMonth();
-        document.getElementById('analyticsMonthDisplay').innerText = `${monthNames[mo]} ${yr}`;
-        const today = new Date(); today.setDate(1); today.setHours(0,0,0,0);
-        document.getElementById('nextMonthBtn').disabled = new Date(yr,mo,1).getTime() >= today.getTime();
-
-        const first = new Date(yr,mo,1).getDay();
-        const adj = first===0?6:first-1;
-        const dim = new Date(yr,mo+1,0).getDate();
-        const grid = document.getElementById('calendarGrid');
-        grid.innerHTML = '';
-        for (let i=0;i<adj;i++) grid.innerHTML += `<div></div>`;
-
-        let perfect=0, water=0, walks=0;
-        const weightDataset = [];
-
-        for (let day=1; day<=dim; day++) {
-            const d = new Date(yr,mo,day);
-            const rec = localStorage.getItem(fmt(d));
-            let cls = 'cell-unlogged', pct = '';
-            if (rec) {
-                const p = JSON.parse(rec);
-                const s = p.computedScore||0;
-                water += (p.waterCount||0)*0.25;
-                if (p.walk) walks++;
-                if (p.weight) weightDataset.push({ day, val: p.weight });
-                if (s>=80) { cls='cell-perfect'; perfect++; }
-                else if (p.routine==='Rest Day') cls='cell-rest';
-                else if (s>0) cls='cell-partial';
-                pct = `<span class="block text-[8px] font-bold opacity-90">${s}%</span>`;
+        const yr=analyticsViewDate.getFullYear(), mo=analyticsViewDate.getMonth();
+        document.getElementById('analyticsMonthDisplay').innerText=`${MONTHS[mo]} ${yr}`;
+        const today=new Date(); today.setDate(1); today.setHours(0,0,0,0);
+        document.getElementById('nextMonthBtn').disabled=new Date(yr,mo,1).getTime()>=today.getTime();
+        const first=new Date(yr,mo,1).getDay(), adj=first===0?6:first-1;
+        const dim=new Date(yr,mo+1,0).getDate();
+        const grid=document.getElementById('calendarGrid'); grid.innerHTML='';
+        for(let i=0;i<adj;i++){const d=document.createElement('div');d.className='cal-empty';grid.appendChild(d);}
+        let perfect=0,water=0,walks=0;const wds=[];
+        for(let day=1;day<=dim;day++){
+            const d=new Date(yr,mo,day);
+            const rec=localStorage.getItem(fmt(d));
+            const btn=document.createElement('button');
+            btn.className='cal-cell';
+            btn.onclick=()=>jumpToDay(day,mo,yr);
+            if(rec){
+                const p=JSON.parse(rec);const s=p.computedScore||0;
+                water+=(p.waterCount||0)*0.25;
+                if(p.walk)walks++;
+                if(p.weight)wds.push({day,val:p.weight});
+                if(s>=80){btn.classList.add('cell-perfect');perfect++;}
+                else if(p.routine==='Rest Day')btn.classList.add('cell-rest');
+                else if(s>0)btn.classList.add('cell-partial');
+                else btn.classList.add('cell-unlogged');
+                btn.innerHTML=`<span class="cal-day">${day}</span><span class="cal-pct">${s}%</span>`;
+            }else{
+                btn.classList.add('cell-unlogged');
+                btn.innerHTML=`<span class="cal-day">${day}</span>`;
             }
-            grid.innerHTML += `<button onclick="jumpToDay(${day},${mo},${yr})"
-                class="${cls} border border-slate-200 rounded-xl p-1 text-center text-xs min-h-[44px] flex flex-col justify-center items-center transition-transform active:scale-95">
-                <span class="text-[10px] font-black">${day}</span>${pct}</button>`;
+            grid.appendChild(btn);
         }
-
-        document.getElementById('consistencyMetric').innerText = `${perfect}/${dim}`;
-        document.getElementById('totalWaterMetric').innerText = `${water.toFixed(1)}L`;
-        document.getElementById('totalWalksMetric').innerText = walks;
-        drawSparkline(weightDataset, dim);
+        document.getElementById('consistencyMetric').innerText=`${perfect}/${dim}`;
+        document.getElementById('totalWaterMetric').innerText=`${water.toFixed(1)}L`;
+        document.getElementById('totalWalksMetric').innerText=walks;
+        drawSparkline(wds,dim);
     }
 
-    function jumpToDay(day, month, year) {
-        currentDate = new Date(year, month, day); currentDate.setHours(0,0,0,0);
+    function jumpToDay(day,mo,yr){
+        currentDate=new Date(yr,mo,day); currentDate.setHours(0,0,0,0);
         switchTab('tracker'); loadDayData();
     }
 
-    function drawSparkline(dataset, dim) {
-        const path = document.getElementById('sparklinePath');
-        const ph = document.getElementById('sparklinePlaceholder');
-        if (dataset.length < 2) { path.setAttribute('d',''); ph.classList.remove('hidden'); return; }
-        ph.classList.add('hidden');
-        const vals = dataset.map(d=>d.val);
-        const maxW=Math.max(...vals), minW=Math.min(...vals), range=maxW===minW?1:maxW-minW;
-        const W=300,H=60,PAD=6;
-        const pts = dataset.map(d => {
-            const x = ((d.day-1)/(dim-1))*(W-PAD*2)+PAD;
-            const y = H-(((d.val-minW)/range)*(H-PAD*2)+PAD);
+    function drawSparkline(dataset,dim){
+        const path=document.getElementById('sparklinePath');
+        const ph=document.getElementById('sparklinePlaceholder');
+        if(dataset.length<2){path.setAttribute('d','');ph.style.display='flex';return;}
+        ph.style.display='none';
+        const vals=dataset.map(d=>d.val);
+        const maxW=Math.max(...vals),minW=Math.min(...vals),range=maxW===minW?1:maxW-minW;
+        const W=300,H=60,P=6;
+        const pts=dataset.map(d=>{
+            const x=((d.day-1)/(dim-1))*(W-P*2)+P;
+            const y=H-(((d.val-minW)/range)*(H-P*2)+P);
             return `${x.toFixed(1)},${y.toFixed(1)}`;
         });
-        path.setAttribute('d', `M ${pts.join(' L ')}`);
+        path.setAttribute('d',`M ${pts.join(' L ')}`);
     }
 
-    function exportMonthToCSV() {
-        const yr=analyticsViewDate.getFullYear(), mo=analyticsViewDate.getMonth();
+    function exportMonthToCSV(){
+        const yr=analyticsViewDate.getFullYear(),mo=analyticsViewDate.getMonth();
         const dim=new Date(yr,mo+1,0).getDate();
         let csv="Date,Routine,Diet,Score,Water(L),Walk,Weight(KG),Notes\n";
-        for (let d=1;d<=dim;d++) {
+        for(let d=1;d<=dim;d++){
             const key=fmt(new Date(yr,mo,d));
             const rec=localStorage.getItem(key);
             if(rec){const p=JSON.parse(rec);csv+=`"${key}","${p.routine}","${p.diet}",${p.computedScore||0},${(p.waterCount||0)*0.25},${p.walk?1:0},${p.weight||''},"${(p.notes||'').replace(/"/g,'""')}"\n`;}
@@ -810,14 +863,11 @@
         }
         const a=document.createElement('a');
         a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-        a.download=`FitTrack_${monthNames[mo]}_${yr}.csv`;
+        a.download=`FitTrack_${MONTHS[mo]}_${yr}.csv`;
         a.click();
     }
 
-    // ============================================================
-    // INIT
-    // ============================================================
-    window.onload = () => { generateCupsGrid(); loadDayData(); };
+    window.onload=()=>{generateCupsGrid();loadDayData();};
     </script>
 </body>
 </html>
